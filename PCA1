@@ -10,7 +10,7 @@ df = pd.read_csv('54_25.csv', header = None)
 
 №график до обработки
 for i in df.columns:
-    plt.scatter(df.index,df[i]
+    plt.scatter(df.index,df[i])
 
 #нормализация
 X = df.values
@@ -26,13 +26,13 @@ X_pca = pca.transform(X)
 #какой процент данных при этом остается
 sum(pca.explained_variance_ratio_)
 
-#Получившийся график с 2мя осями
+#Получившийся график 
 df1 = pd.DataFrame(X_pca)
 for i in df1.columns:
     plt.scatter(df1.index,df1[i])
 
 #График зависимости процента сохраняемых данных от количества сохраняемых фич
-pca = PCA(n_components = 2)
+pca = PCA(n_components = 10)
 pca.fit(X)
 X_pca = pca.transform(X)
 plt.plot(np.cumsum(pca.explained_variance_ratio_))
