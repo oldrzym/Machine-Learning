@@ -1,0 +1,38 @@
+import pandas as pd
+import os
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import numpy as np
+
+#чтение данных - массив 60х10
+df = pd.read_csv('54_25.csv', header = None)
+
+№график до обработки
+for i in df.columns:
+    plt.scatter(df.index,df[i]
+
+#нормализация
+X = df.values
+scaler = StandardScaler()
+scaler.fit(X)
+X1 = scaler.transform(X)
+
+#сокращение размерности данных до 2х
+pca = PCA(n_components = 2)
+pca.fit(X)
+X_pca = pca.transform(X)
+
+#какой процент данных при этом остается
+sum(pca.explained_variance_ratio_)
+
+#Получившийся график с 2мя осями
+df1 = pd.DataFrame(X_pca)
+for i in df1.columns:
+    plt.scatter(df1.index,df1[i])
+
+#График зависимости процента сохраняемых данных от количества сохраняемых фич
+pca = PCA(n_components = 2)
+pca.fit(X)
+X_pca = pca.transform(X)
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
