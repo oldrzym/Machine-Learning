@@ -1,0 +1,22 @@
+import pandas as pd
+import os
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import numpy as np
+
+#чтение score matrix и loading matrix
+df1 = pd.read_csv('X_reduced_648.csv', header = None, sep = ';')
+df2 = pd.read_csv('X_loadings_648.csv', header = None, sep = ';')
+
+#получение матрицы 100х100 умножением (подробнее http://www.statistics4u.com/fundstat_eng/cc_pca_loadscore.html)
+u = np.array(df1.values)
+v = np.array(df2.values)
+a = u.dot(v.transpose())
+
+#прорисовка восстановленной картинки
+fig, ax = plt.subplots()
+ax.imshow(a)
+fig.set_figwidth(40)    
+fig.set_figheight(40)    
+plt.show()
