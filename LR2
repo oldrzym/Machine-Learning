@@ -1,0 +1,49 @@
+import pandas as pd
+import os
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+#функция, чтобы удалить определенную колонку из df
+def pop_row(df, row):
+    for i in range(len(df['competitorname'])):
+        n = i
+        if df['competitorname'].iloc[i] == row:
+            break
+    df = df.T
+    r = df.pop(n)
+    df = df.T
+    return df, r
+
+#чтение датасета и приведение его в вид для модели
+df = pd.read_csv('candy-data.csv')
+df.pop('Y')
+df, row2 = pop_row(df, 'Dum Dums')
+df, row1 = pop_row(df, 'Charleston Chew')
+row1, row2 = row1.tolist(), row2.tolist()
+df.pop('competitorname')
+Y = df.pop('winpercent').tolist()
+X = df.values
+
+#приведение выбранных строк в надлежащий вид
+row1.pop(0)
+row1.pop(len(row1)-1)
+row2.pop(0)
+row2.pop(len(row2)-1)
+row1, row2 = np.array([row1]), np.array([row2])
+
+#обучение модели
+reg = LinearRegression().fit(X, Y)
+
+#предсказание
+reg.predict(row1)
+reg.predict(row2)
+
+#новый случайный набор данных
+arr = np.array([[0,0,0,1,0,1,1,0,1,0.885,0.649]])
+
+#предсказание
+reg.predict(arr)
+
