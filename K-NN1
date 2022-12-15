@@ -1,0 +1,31 @@
+import pandas as pd
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+
+#чтение датасета и небольшая обработка
+df = pd.read_csv('class1.csv', sep = ',')
+df.pop('id')
+
+#выделение фич и ответов
+y = df.pop('Class').tolist()
+X = df.values
+
+#обучение алгоритма на евклидовой дистанции
+neigh = KNeighborsClassifier(n_neighbors=3)
+neigh.fit(X, y)
+
+#нахождение трех ближайших точек к точке 67,36
+distances, ids = neigh.kneighbors([[67,36]])
+
+#предсказание, к ккому классу относится точка 67,36
+neigh.predict([[67,36]])
+
+#обучение алгоритма на манхеттоновской дистанции
+neigh = KNeighborsClassifier(n_neighbors=3, p = 1)
+neigh.fit(X, y)
+
+#нахождение трех ближайших точек к точке 67,36
+neigh.kneighbors([[67,36]])
+
+#предсказание, к ккому классу относится точка 67,36
+neigh.predict([[67,36]])
