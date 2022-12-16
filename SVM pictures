@@ -1,0 +1,63 @@
+import cv2
+from sklearn.svm import LinearSVC
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import numpy as np
+from sklearn.metrics import roc_auc_score
+
+#функция для перевода картинки в гистограмму 
+def extract_histogram(image, bins=(8, 8, 8)):
+    img = cv2.imread(image)
+    hist = cv2.calcHist([img], [0, 1, 2], None, bins, [0, 256, 0, 256, 0, 256])
+    cv2.normalize(hist, hist)
+    return hist.flatten()
+
+#создание df из тренировочных картинок
+df_train = pd.DataFrame()
+for i in os.listdir('train'):
+    df1 = pd.DataFrame(extract_histogram(f'train/{i}'))
+    df1 = df1.T
+    if i[0:3] == 'cat':
+        df1['Y'] = 1
+    if i[0:3] == 'dog':
+        df1['Y'] = 0
+    df_train = pd.concat([df_train, df1], ignore_index = True)
+
+#перевод в данные для модели
+y_train = df_train.pop('Y').tolist()
+X_train = df_train.values
+
+#перевод тестовых данных в df
+df_test = pd.DataFrame()
+for i in os.listdir('test'):
+    df1 = pd.DataFrame(extract_histogram(f'test/{i}'))
+    df1 = df1.T
+    if i[0:3] == 'cat':
+        df1['Y'] = 1
+    if i[0:3] == 'dog':
+        df1['Y'] = 0
+    df_test = pd.concat([df_train, df1], ignore_index = True)
+
+#перевод в данные для модели
+y_test = df_test.pop('Y').tolist()
+X_test = df_test.values
+
+#параметры для модели
+lsvc = LinearSVC(C = 1.35, random_state = 15)
+LinearSVC()
+
+#обучение модели
+lsvc.fit(X_train, y_train)
+lsvc.score(X_train, y_train)
+
+#данные для рок_аук
+y_pred = [lsvc.predict(df_test.iloc[i].to_numpy().reshape(1, -1)) for i in range(len(df_test))]
+y_pred = [i[0] for i in y_pred]
+#рок_аук_скор
+roc_auc_score(y_test, y_pred)
+
+#некоторые коэффициенты
+lsvc.coef_.tolist()[0][371]
+lsvc.coef_.tolist()[0][271]
+lsvc.coef_.tolist()[0][55]
