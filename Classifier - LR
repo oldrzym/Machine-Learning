@@ -1,0 +1,62 @@
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import roc_auc_score
+
+#функция, чтобы удалить определенную колонку из df
+def pop_row(df, row):
+    for i in range(len(df['competitorname'])):
+        n = i
+        if df['competitorname'].iloc[i] == row:
+            break
+    df = df.T
+    r = df.pop(n)
+    df = df.T
+    return df, r
+    
+#чтение датасета и приведение его в вид для модели
+df = pd.read_csv('candy-data.csv')
+df.pop('winpercent')
+df, row3 = pop_row(df, 'Sixlets')
+df, row1 = pop_row(df, 'Runts')
+df, row2 = pop_row(df, 'Chewey Lemonhead Fruit Mix')
+df.pop('competitorname')
+y = df.pop('Y').tolist()
+X = df.values
+
+#чтение тестового датасета
+df1 = pd.read_csv('candy-test.csv')
+df1, row2 = pop_row(df1, 'Tootsie Roll Midgies')
+df1, row1 = pop_row(df1, 'Tootsie Roll Juniors')
+row1, row2 = row1.tolist(), row2.tolist(
+
+#приведение выбранных строк в надлежащий вид
+row1.pop(0)
+row1.pop(len(row1)-1)
+row2.pop(0)
+row2.pop(len(row2)-1)
+row1, row2 = np.array([row1]), np.array([row2])
+
+#обучение модели
+reg = LogisticRegression(random_state = 2019, solver = 'lbfgs').fit(X, y)
+
+#вероятность точно предсказания для вбранных строк
+reg.predict_proba(row1)
+reg.predict_proba(row2)
+
+#обработка тестового датасета
+df1 = pd.read_csv('candy-test.csv')
+df1.pop('competitorname')
+predicted_y = df1.pop('Y').tolist()
+pred_y = [reg.predict(df1.iloc[i].to_numpy().reshape(1, -1)) for i in range(len(df1))]
+pred_y = [i[0] for i in pred_y]
+
+#рок аук для тестового датасета
+roc_auc_score(predicted_y, pred_y)
+#0.86
+
+#precision и recall для тестового датасета
+precision, recall, thresholds = precision_recall_curve(predicted_y, pred_y)
+precision[1]
+recall[1]
