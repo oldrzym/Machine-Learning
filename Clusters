@@ -1,0 +1,29 @@
+from sklearn.cluster import KMeans
+import pandas as pd
+import os
+import numpy as np
+
+#чтение датасета
+df = pd.read_csv('clusters.csv', index_col = 'Object')
+y = df.pop('Cluster')
+X = df.values
+
+#кластеризация по 3м кластерам
+kmeans = KMeans(n_clusters=3, init=np.array([[13.5, 8.75], [11.67, 10.33], [9.8, 9.0]]), max_iter=100, n_init=1).fit(X)
+
+#к какому кластеру относится каждая точка
+kmeans.labels_
+
+#нахождение среднего расстояния от центра каждого кластера до точек
+def k_mean_distance(data, cx, cy, i_centroid, cluster_labels):
+        distances = [np.sqrt((x-cx)**2+(y-cy)**2) for (x, y) in data[cluster_labels == i_centroid]]
+        return np.mean(distances)
+
+clusters=k_means.fit_predict(X)
+centroids = kmeans.cluster_centers_
+c_mean_distances = []
+for i, (cx, cy) in enumerate(centroids):
+    mean_distance = k_mean_distance(X, cx, cy, i, clusters)
+    c_mean_distances.append(mean_distance)
+    
+c_mean_distances
