@@ -1,0 +1,50 @@
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import StackingClassifier
+import cv2
+import pandas as pd
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+#функция для преобразования картинки в гистограмму распределения цветов
+def extract_histogram(image, bins=(8, 8, 8)):
+    img = cv2.imread(image)
+    hist = cv2.calcHist([img], [0, 1, 2], None, bins, [0, 256, 0, 256, 0, 256])
+    cv2.normalize(hist, hist)
+    return hist.flatten()
+
+#обработка датасета
+df_train = pd.DataFrame()
+for i in os.listdir('train'):
+    df1 = pd.DataFrame(extract_histogram(f'train/{i}'))
+    df1 = df1.T
+    if i[0:3] == 'cat':
+        df1['Y'] = 1
+    if i[0:3] == 'dog':
+        df1['Y'] = 0
+    df_train = pd.concat([df_train, df1], ignore_index = True)
+    
+y_train = df_train.pop('Y').tolist()
+X_train = df_train.values
+
+#создание ансамбля
+estimators = [
+    ('rf', RandomForestClassifier(n_estimators = 19, criterion = 'entropy', min_samples_leaf = 10, max_leaf_nodes = 20, random_state = 242)),
+    ('bag', BaggingClassifier(n_estimators = 19, random_state = 242)),
+    ('tree', DecisionTreeClassifier(criterion = 'entropy', min_samples_leaf = 10, max_leaf_nodes = 20, random_state = 242)),
+    ('cvc', LinearSVC(C = 1.21, random_state = 242))
+]
+
+clf = StackingClassifier(
+    estimators=estimators, final_estimator=LogisticRegression(solver='lbfgs', random_state = 242), cv = 2
+)
+
+#тренировка модели
+clf.fit(X_train,y_train).score(X_train,y_train)
+
+#предсказание случайной тестовой картинки
+clf.predict_proba(extract_histogram('test/dog.1030.jpg').reshape(1, -1))
