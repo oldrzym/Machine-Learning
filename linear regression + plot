@@ -1,0 +1,33 @@
+from sklearn.model_selection import train_test_split
+import pandas as pd
+import numpy as np
+from sklearn.metrics import roc_auc_score
+import matplotlib.pyplot as plt
+from sklearn import svm
+
+#чтение датасета
+df = pd.read_csv("test1.csv", index_col="Unnamed: 0")
+X = np.array(df[["x1", "x2"]])
+y = np.array(df[["y"]])
+
+#создание тестовой выборки
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
+#обучение модели
+model = svm.SVC(kernel='poly', degree=3)
+model.fit(X_train, y_train)
+
+#roc_auc_score
+y_pred = model.predict(X_test)
+roc_auc_score(y_test, y_pred)
+
+#прорисовка получившейся функции
+fig, ax = plt.subplots(figsize=(12, 7))
+xx = np.linspace(-1, 3, len(X))
+yy = np.linspace(0, 2, len(y))
+YY, XX = np.meshgrid(yy, xx)
+xy = np.vstack([XX.ravel(), YY.ravel()]).T
+Z = model.decision_function(xy).reshape(XX.shape)
+ax.contour(XX, YY, Z, colors='k', levels=[0], alpha=0.5, linestyles=['-'])
+plt.scatter(df.x1, df.x2, c=df.y)
+plt.show()
